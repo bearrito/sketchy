@@ -5,15 +5,15 @@ from itertools import repeat
 import math
 import bit_arithmetic
 
- #with b in [4...16]
-
-alphas = {16: 0.673, 32: 0.697, 64: 0.709}
 
 
 
 class HyperLogLog(object):
 
     def __init__(self, b: int):
+
+        alphas = {16: 0.673, 32: 0.697, 64: 0.709}
+
         assert(b in range(4, 16))
         self.b = b
         self.num_registers = pow(2,self.b)
