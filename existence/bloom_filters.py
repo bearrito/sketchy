@@ -1,8 +1,8 @@
 import typing
 import hashlib
 from array import array
+from bitarray import bitarray
 from itertools import repeat
-from collections import Iterable
 import sys
 
 from abc import ABCMeta, abstractmethod
@@ -19,14 +19,6 @@ class ExistenceChecker:
     def exists(self, observable) -> bool:
         pass
 
-
-class BloomFilter(ExistenceChecker):
-    def __init__(self, size, num_hashes):
-        assert (size > 0 and num_hashes > 0)
-        self.num_hashes = num_hashes
-        self.size = size
-        self.filter = array('i', repeat(0, self.size))
-
     def _internal_hash(self, key, i:int) -> int:
         sha = hashlib.sha384()
         sha.update(str(i).encode('utf-8'))
@@ -35,9 +27,18 @@ class BloomFilter(ExistenceChecker):
         return hash
 
     def _hashes(self, key):
-
         hashes = [self._internal_hash(key, i + 1) for i in range(self.num_hashes)]
         return hashes
+
+
+class BloomFilter(ExistenceChecker):
+    def __init__(self, size, num_hashes):
+        assert (size > 0 and num_hashes > 0)
+        self.num_hashes = num_hashes
+        self.size = size
+        self.filter = bitarray(self.size)
+
+
 
     def _insert_at(self, idx : int):
         self.filter[idx] = 1
@@ -54,6 +55,13 @@ class BloomFilter(ExistenceChecker):
 
 
 class CountingBloomFilter(BloomFilter):
+
+    def __init__(self, size, num_hashes):
+        assert (size > 0 and num_hashes > 0)
+        self.num_hashes = num_hashes
+        self.size = size
+        self.filter = array('i',repeat(0,self.size))
+
 
     def _insert_at(self, idx : int):
         self.filter[idx] += 1
