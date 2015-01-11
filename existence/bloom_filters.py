@@ -1,9 +1,11 @@
-import typing
+
 import hashlib
 from array import array
 from bitarray import bitarray
 from itertools import repeat
 import sys
+import pickle
+import math
 
 from abc import ABCMeta, abstractmethod
 
@@ -18,6 +20,15 @@ class ExistenceChecker:
     @abstractmethod
     def exists(self, observable) -> bool:
         pass
+    @abstractmethod
+    def merge(self, filter):
+        pass
+
+    @abstractmethod
+    def error_rate(self) -> float:
+        pass
+
+
 
     def _internal_hash(self, key, i:int) -> int:
         sha = hashlib.sha384()
@@ -31,12 +42,20 @@ class ExistenceChecker:
         return hashes
 
 
+
+class BloomFilterMerge(object):
+    def __init__(self, size:int, num_hashes:int, filter):
+        self.size = size
+        self.num_hashes = num_hashes
+        self.filter = filter
+
 class BloomFilter(ExistenceChecker):
     def __init__(self, size, num_hashes):
         assert (size > 0 and num_hashes > 0)
         self.num_hashes = num_hashes
         self.size = size
         self.filter = bitarray(self.size)
+        self._count = 0
 
 
 
@@ -44,6 +63,7 @@ class BloomFilter(ExistenceChecker):
         self.filter[idx] = 1
 
     def insert(self, observable):
+        self._count +=1
         [self._insert_at(idx) for idx in self._hashes(observable)]
 
     def exists(self, observable) -> bool:
@@ -52,6 +72,27 @@ class BloomFilter(ExistenceChecker):
             if entry == 0:
                 return False
         return True
+
+    def merge_view(self):
+        return pickle.dumps(BloomFilterMerge(self.size,self.num_hashes, self.filter ))
+
+    def error_rate(self) -> float:
+       return math.pow(1 - math.exp(-self.num_hashes * self._count / float(self.size)), self.num_hashes)
+
+    def merge(self, bloom_filter_merge):
+        mergeable = pickle.loads(bloom_filter_merge)
+
+        preconditions = [
+            mergeable.size == self.size,
+            mergeable.num_hashes == self.num_hashes
+        ]
+
+        if all(preconditions):
+            for idx,location,  in enumerate(mergeable.filter):
+                self.filter[idx] = (self.filter[idx] or location)
+
+
+
 
 
 class CountingBloomFilter(BloomFilter):
@@ -82,14 +123,3 @@ class CountingBloomFilter(BloomFilter):
         return  current_min
 
 
-counting_bloom = CountingBloomFilter(1000, 32)
-counting_bloom.insert("ss")
-e0 = counting_bloom.exists("ss")
-c0 = counting_bloom.count("ss")
-counting_bloom.insert("ss")
-c0 = counting_bloom.count("ss")
-
-counting_bloom.delete("ss")
-e1 = counting_bloom.exists("ss")
-c1 = counting_bloom.count("ss")
-a = 1
