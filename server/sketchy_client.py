@@ -1,4 +1,5 @@
 import asyncio
+from protocols.messages_pb2 import BloomUpdate
 
 class EchoClientProtocol:
     def __init__(self, message, loop):
@@ -9,7 +10,15 @@ class EchoClientProtocol:
     def connection_made(self, transport):
         self.transport = transport
         print('Send:', self.message)
-        self.transport.sendto(self.message.encode())
+
+        update = BloomUpdate()
+        update.size = 10000
+        update.num_hashes = 9
+        update.ones_indices.append(1)
+        update.ones_indices.append(839)
+        update.ones_indices.append(5422)
+        protobuf = update.SerializeToString()
+        self.transport.sendto(protobuf)
 
     def datagram_received(self, data, addr):
         print("Received:", data.decode())
