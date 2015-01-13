@@ -7,6 +7,6 @@ def test_weighted_sampler():
 
     stream = chain(*repeat([1, 4, 5], 10000))
     shuffle(stream)
-    
+
     for i in stream:
         weightedSampler.observe(i)

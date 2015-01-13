@@ -7,6 +7,8 @@ import sys
 import pickle
 import math
 
+from protocols.messages_pb2 import BloomUpdate
+
 from abc import ABCMeta, abstractmethod
 
 
@@ -42,29 +44,24 @@ class ExistenceChecker:
         return hashes
 
 
-
-class BloomFilterMerge(object):
-    def __init__(self, size:int, num_hashes:int, filter):
-        self.size = size
-        self.num_hashes = num_hashes
-        self.filter = filter
-
 class BloomFilter(ExistenceChecker):
     def __init__(self, size, num_hashes):
         assert (size > 0 and num_hashes > 0)
         self.num_hashes = num_hashes
         self.size = size
         self.filter = bitarray(self.size)
+        self.filter.setall(False)
         self._count = 0
 
 
 
     def _insert_at(self, idx : int):
-        self.filter[idx] = 1
+        self.filter[idx] = True
 
     def insert(self, observable):
-        self._count +=1
-        [self._insert_at(idx) for idx in self._hashes(observable)]
+        self._count += 1
+        for idx in self._hashes(observable):
+             self._insert_at(idx)
 
     def exists(self, observable) -> bool:
         for idx in self._hashes(observable):
@@ -74,22 +71,32 @@ class BloomFilter(ExistenceChecker):
         return True
 
     def merge_view(self):
-        return pickle.dumps(BloomFilterMerge(self.size,self.num_hashes, self.filter ))
+
+        update = BloomUpdate()
+
+        update.size = self.size
+        update.num_hashes = self.num_hashes
+        for idx, key in enumerate(self.filter):
+            if key:
+                update.ones_indices.append(idx)
+
+        return update.SerializeToString()
 
     def error_rate(self) -> float:
        return math.pow(1 - math.exp(-self.num_hashes * self._count / float(self.size)), self.num_hashes)
 
-    def merge(self, bloom_filter_merge):
-        mergeable = pickle.loads(bloom_filter_merge)
+    def merge(self, bloom_filter_view):
+        update = BloomUpdate()
+        update.ParseFromString(bloom_filter_view)
 
         preconditions = [
-            mergeable.size == self.size,
-            mergeable.num_hashes == self.num_hashes
+            update.size == self.size,
+            update.num_hashes == self.num_hashes
         ]
 
         if all(preconditions):
-            for idx,location,  in enumerate(mergeable.filter):
-                self.filter[idx] = (self.filter[idx] or location)
+            for location in update.ones_indices:
+                self.filter[location] = True
 
 
 

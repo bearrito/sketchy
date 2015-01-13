@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package sketchy;
+
+message BloomUpdate {
+  optional int32 size = 1;
+  optional int32 num_hashes = 2;
+  repeated int32 ones_indices = 3;
+}

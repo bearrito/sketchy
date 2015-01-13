@@ -8,6 +8,13 @@ def test_insert():
     bloom_filter.insert(test_key)
     assert (bloom_filter.exists(test_key))
 
+
+def test_hash_insert_count():
+    test_key = "test_object"
+    bloom_filter = BloomFilter(10000, 5)
+    bloom_filter.insert(test_key)
+    assert (bloom_filter.filter.count() == 5)
+
 def test_non_existence():
     test_key = "test_key"
     bloom_filter = BloomFilter(10000, 5)
@@ -23,7 +30,6 @@ def test_merge_of_filter_into_empty():
     merge_view = bloom_filter1.merge_view()
 
     bloom_filter0.merge(merge_view)
-
     assert(bloom_filter0.exists(test_key))
 
 def test_error_rate():
