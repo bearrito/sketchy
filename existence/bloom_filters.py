@@ -80,14 +80,13 @@ class BloomFilter(ExistenceChecker):
             if key:
                 update.ones_indices.append(idx)
 
-        return update.SerializeToString()
+        return update
 
     def error_rate(self) -> float:
        return math.pow(1 - math.exp(-self.num_hashes * self._count / float(self.size)), self.num_hashes)
 
-    def merge(self, bloom_filter_view):
-        update = BloomUpdate()
-        update.ParseFromString(bloom_filter_view)
+    def merge(self, update):
+
 
         preconditions = [
             update.size == self.size,

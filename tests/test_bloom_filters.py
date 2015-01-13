@@ -1,5 +1,6 @@
 from itertools import chain, repeat
 from existence.bloom_filters import BloomFilter, CountingBloomFilter
+from protocols.messages_pb2 import BloomUpdate
 
 
 def test_insert():
@@ -27,9 +28,12 @@ def test_merge_of_filter_into_empty():
     bloom_filter1 = BloomFilter(10000, 5)
 
     bloom_filter1.insert(test_key)
-    merge_view = bloom_filter1.merge_view()
+    update = bloom_filter1.merge_view()
+    stringy = update.SerializeToString()
+    update = BloomUpdate()
+    update.ParseFromString(stringy)
 
-    bloom_filter0.merge(merge_view)
+    bloom_filter0.merge(update)
     assert(bloom_filter0.exists(test_key))
 
 def test_error_rate():
