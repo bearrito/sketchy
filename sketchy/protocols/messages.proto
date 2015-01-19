@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package sketchy;
+
+message BloomObservation {
+  optional string key = 1;
+
+}
+
+message BloomMerge {
+  optional int32 width = 1;
+  optional int32 depth = 2;
+  repeated int32 ones_indices = 3;
+}
+
+message ReservoirUpdate {
+
+  message KeyValue {
+    optional double key = 1;
+    optional double value = 2;
+  }
+
+  repeated KeyValue keys = 1;
+
+
+}
