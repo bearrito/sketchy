@@ -7,7 +7,7 @@ class PeriodicTask(object):
 
     @asyncio.coroutine
     def broadcast(self):
-        self.mergeable.merge_view()
+        self.mergeable.build_merge_object()
 
 
 

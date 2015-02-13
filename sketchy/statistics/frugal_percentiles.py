@@ -1,6 +1,7 @@
 from numbers import Real
 from random import random
-from abc import ABCMeta,abstractmethod
+import typing
+from abc import ABCMeta, abstractmethod
 
 
 class FrugalStatistics:
@@ -25,7 +26,7 @@ class FrugalMedian(FrugalStatistics):
         elif observable < self.median_estimate:
             self.median_estimate -= 1
 
-    def estimate(self):
+    def estimate(self) -> Real:
         return self.median_estimate
 
 class FrugalQuantile(FrugalStatistics):
@@ -37,7 +38,6 @@ class FrugalQuantile(FrugalStatistics):
 
     def observe(self, observable: Real):
         r = random()
-
         if observable > self.quantile_estimate and r > 1 - self.quantile:
             self.quantile_estimate += 1
         elif observable < self.quantile_estimate and r > self.quantile:

@@ -20,7 +20,7 @@ class CountMinSketch(HashProvider):
 
     def _initialize_sketch(self):
         for idx in range(self.depth):
-           self.sketch[idx] = array.array('l', range(0, self.width))
+            self.sketch[idx] = array.array('l', range(0, self.width))
 
     def observe(self, item):
         for idx, hash in enumerate(self._hashes(item)):
@@ -31,10 +31,3 @@ class CountMinSketch(HashProvider):
         for idx, hash in enumerate(self._hashes(item)):
             current_min = min(self.sketch[idx][hash], current_min)
         return current_min
-
-
-sketch = CountMinSketch(5,10)
-sketch.observe("soo")
-sketch.observe("soo")
-cnt = sketch.count("soo")
-a=1

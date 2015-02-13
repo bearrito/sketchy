@@ -19,6 +19,7 @@ class ReservoirSampler(object):
 
         self.count +=1
 
+
 class WeightedReservoirSampler(object):
     def __init__(self, size, weights):
         self.weights = weights
@@ -28,7 +29,6 @@ class WeightedReservoirSampler(object):
     def _compute_key(self, item):
         key = math.pow(random(), 1 / float(self.weights.get(item, 1)))
         return key
-
 
     def observe(self, item):
 

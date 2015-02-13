@@ -26,7 +26,6 @@ class LossyCounter(object):
         if self._n % self.width:
             purgeable = []
 
-            #Need to check if I can delete while enumerating
             for k, triple in self._triples.values():
                 if triple.can_purge():
                     purgeable.append(k)

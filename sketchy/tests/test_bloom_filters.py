@@ -29,7 +29,7 @@ def test_merge_of_filter_into_empty():
     bloom_filter1 = BloomFilter(10000, 5)
 
     bloom_filter1.insert(test_key)
-    update = bloom_filter1.merge_view()
+    update = bloom_filter1.build_merge_object()
     stringy = update.SerializeToString()
     update = BloomMerge()
     update.ParseFromString(stringy)

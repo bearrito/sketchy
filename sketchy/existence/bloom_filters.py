@@ -66,7 +66,7 @@ class BloomFilter(ExistenceChecker):
                 return False
         return True
 
-    def merge_view(self):
+    def build_merge_object(self):
 
         update = BloomMerge()
 
@@ -82,7 +82,6 @@ class BloomFilter(ExistenceChecker):
        return math.pow(1 - math.exp(-self.depth * self._count / float(self.width)), self.depth)
 
     def merge(self, update):
-
 
         preconditions = [
             update.width == self.width,
